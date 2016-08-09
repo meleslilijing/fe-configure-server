@@ -2,7 +2,7 @@
 const views = require('co-views');
 const parse = require('co-body');
 
-const render = views(__dirname + '/../views', {
+const render = views(__dirname + '/../../client/html/', {
   map: { html: 'swig' }
 })
 

@@ -23,8 +23,8 @@ app.use(route.get('/promise', messages.promise));
 app.use(route.get('/', fe_configure.index));
 
 // Serve static files
-app.use(serve(path.join(__dirname, '/public')));
-// app.use(serve(path.join(__dirname, '/../client/dist/')));
+// app.use(serve(path.join(__dirname, '/public')));
+app.use(serve(path.join(__dirname, '/../client/dist/')));
 
 // Compress
 app.use(compress());

@@ -14,11 +14,11 @@ const app = koa();
 app.use(logger());
 
 // app.use(route.get('/', messages.home));
-app.use(route.get('/messages', messages.list));
-app.use(route.get('/messages/:id', messages.fetch));
-app.use(route.post('/messages', messages.create));
-app.use(route.get('/async', messages.delay));
-app.use(route.get('/promise', messages.promise));
+// app.use(route.get('/messages', messages.list));
+// app.use(route.get('/messages/:id', messages.fetch));
+// app.use(route.post('/messages', messages.create));
+// app.use(route.get('/async', messages.delay));
+// app.use(route.get('/promise', messages.promise));
 
 app.use(route.get('/', fe_configure.index));
 

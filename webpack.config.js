@@ -19,7 +19,8 @@ module.exports = {
 	output: {
 		path: clientTargetDir,
 		filename: '[name].js',
-		publicPath: './'
+		publicPath: './',
+		chunkFilename: 'js/[id].chunk.js'
 	},
 	resolve: {
 		extensions: ['', '.js', '.jsx'],
@@ -51,12 +52,14 @@ module.exports = {
 		new HtmlwebpackPlugin({
 			filename: path.join(clientDir, 'html/index.html'),
 			template: path.join(clientDir, 'template/index.html'),
-			title: '首页'
+			title: '首页',
+			chunks: ['index', 'vendors'],
 		}),
 		new HtmlwebpackPlugin({
-			filename: path.join(clientDir, 'html/index.html'),
-			template: path.join(clientDir, 'template/index.html'),
-			title: '首页'
+			filename: path.join(clientDir, 'html/project_list.html'),
+			template: path.join(clientDir, 'template/project_list.html'),
+			title: '项目列表',
+			chunks: ['project_list', 'vendors']
 		}),
 		new webpack.DefinePlugin({ // inject node variable
 			'process.env': {

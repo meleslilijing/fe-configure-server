@@ -63,7 +63,7 @@ module.exports = {
 		}),
 		new webpack.DefinePlugin({ // inject node variable
 			'process.env': {
-				'NODE_ENV': '"product"'
+				'NODE_ENV': '"production"'
 			}
 		})
 	]

@@ -1,4 +1,3 @@
-
 # koa-app 的generator项目
 
 ## START
@@ -11,3 +10,21 @@ server:
 client:
 - dev:    mock server的develop模式
 - build:  mock server的build模式
+
+## DB desine
+
+### Table: projectList
+| Column | Type     | describe |
+| :------------- | :------------- | :------------- |
+| id       | INT       |                      |
+| name       | VARCHAR(64)       | 项目名称            |
+| nameText       | VARCHAR(64)       | 项目文字名       |
+| currentVersion       | VARCHAR(24)   | 当前版本         |
+| timestamp       | TIMESTAMP   | 当前版本         |
+
+### Table: versionHistory
+| Column | Type     | describe |
+| :------------- | :------------- | :------------- |
+| id       | INT       |   |
+| name| VARCHAR(64) | 项目名称 |
+| version| VARCHAR(24) | 版本号 |

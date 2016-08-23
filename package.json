@@ -9,6 +9,7 @@
     "dev": "gulp dev"
   },
   "dependencies": {
+    "bunyan": "^1.8.1",
     "co-body": "^4.0.0",
     "co-views": "^2.1.0",
     "koa": "^1.2.0",

@@ -1,17 +1,32 @@
 'use strict';
 const messages = require('./controllers/messages');
-
+const path = require('path');
 const compress = require('koa-compress');
 const logger = require('koa-logger');
+// const bunyan = require('bunyan');
+// const log = bunyan.createLogger({
+//     name: 'myapp',
+//     streams: [
+//         {
+//             level: 'info',
+//             stream: path.join(__dirname, './log/info.log')
+//         }
+//     ]
+// });
+
 const serve = require('koa-static');
 const koa = require('koa');
-const path = require('path');
 const router = require('koa-router');
 const rootRouter = require('./routes/routes.js');
 const app = koa();
 
 // Logger
 app.use(logger());
+
+// app.use(function *(next) {
+// 	log.info()
+// 	yield next;
+// })
 
 app.use(rootRouter.routes());
 

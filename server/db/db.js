@@ -1,5 +1,3 @@
-var config = require('./db_config.js');
-
 var options = {
     host: 'localhost',
     port: '3306',
@@ -14,7 +12,6 @@ var options = {
 var mysql = require('mysql2');
 var pool = mysql.createPool(options);
 
-// promise
 function execQuery(sql, values, callback) {
     pool.getConnection(function(err, connection) {
         if (err) {
@@ -62,7 +59,39 @@ module.exports.insertVersion = function(name, version) {
         })
     }); // endof return
 };
-//
+
+module.exports.createRandomVersion = function() {
+   var random = function() {
+        var result = parseInt(Math.random()*1000);
+        (result < 1000) && (result = '0' + result);
+        return result;
+    };
+
+    var testVersion = 'testVersion' + random();
+    var timestamp = +new Date;
+    var sqls = [
+        `INSERT INTO versionHistory (name, version) VALUES (testProject, ${testVersion});`,
+        `UPDATE projectList set vurrentVersion=${testVersion}, timestamp=${timestamp} where name=testProject`
+    ]
+
+    return new Promise(function(resolve, reject) {
+        execQuery(sqls[0], function(error, rows) {
+            execQuery(sqls[1], function(error2, rows2) {
+                var err = error2 || error;
+                if(err) {
+                    reject(err);
+                }
+                else {
+                    resolve(rows2 || rows);
+                }
+            })
+        });
+    })
+   
+
+    
+}
+
 // module.exports.testInsert = function(name, version) {
 //     var name = name + '';
 //     var version = version + '';

@@ -20,4 +20,5 @@ class App extends Component {
     }
 }
 
-ReactDOM.render(<App />, content);
+export default App
+// ReactDOM.render(<App />, content);

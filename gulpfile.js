@@ -25,7 +25,7 @@ gulp.task('dev', function() {
 			]));
 });
 
-gulp.task('build', ['_clean'], function() {
+gulp.task('build', /*['_clean']*/, function() {
 	return gulp.src(WEBPACK_CONFIG_PATH, { read: false })
 			.pipe(shell([
 				'webpack --progress --profile --colors --config webpack.config.js'

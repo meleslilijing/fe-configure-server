@@ -6,12 +6,25 @@ var HtmlwebpackPlugin = require('html-webpack-plugin');
 
 var pagesDir = path.join(__dirname, 'client/pages');
 
-function getFilesList(dir) {
-	var files = fs.readdirSync(dir);
+function getFilesList(dir, resolve) {
+	var files = fs.readdirSync(dir)
 
 	var result = {};
 
-	files.forEach(function(file) {
+	files
+	.filter(function(file) {
+		// 过滤入口文件的数据类型
+		var ext = path.extname(file);
+
+		for(var type = 0; type < resolve.length; type++) {
+			if('.'+resolve[type] === ext) {
+				return true;
+			}
+		}
+
+		return false;
+	})
+	.forEach(function(file) {
 		var ext = path.extname(file);
 		var name = path.basename(file, ext);
 		result[name] = path.join(pagesDir, file)
@@ -21,19 +34,28 @@ function getFilesList(dir) {
 }
 
 function getEntrys(pages) {
-	var entrys = pages;
+	var pages = Object.assign({}, pages);
 
-	return Object.assign({vendors: ['react', 'react-dom']}, entrys);
+	var entrys = {};
+
+	for(var key in pages) {
+		 var page = pages[key];
+		 if(!(page instanceof Array)) {
+			 entrys[key] = [page];
+		 }
+		 entrys[key].push("webpack-hot-middleware/client?reload=true&timeout=20000&quiet=true")
+	}
+	return entrys;
 }
 
 // return example.jsx
-var pages = getFilesList(pagesDir);
+var pages = getFilesList(pagesDir, ['js', 'jsx']);
 
 // return {
-// 		example: { "xxx/xx/example.js" },
+// 		example: [ "xxx/xx/example.js", "webpack-dev-server/client?http://localhost:8080/", "webpack/hot/dev-server" ],
 // 		vendors: [ 'react', 'react-dom' ]
 // }
-var entrys = getEntrys(Object.assign({}, pages));
+var entrys = getEntrys(pages);
 
 module.exports = {
 	entry: entrys,
@@ -45,6 +67,7 @@ module.exports = {
 	resolve: {
 		extensions: ['', '.js', '.jsx'],
 	},
+	devtool: 'source-map',
 	module: {
 		loaders: [{
 			test: /\.css$/,
@@ -70,12 +93,14 @@ module.exports = {
 				'NODE_ENV': '"production"'
 			}
 		}),
-		new webpack.optimize.CommonsChunkPlugin('vendors', 'common.js'),
-		new webpack.optimize.UglifyJsPlugin({
-			compress: {
-				warnings: false
-			}
-		}),
+		// new webpack.optimize.CommonsChunkPlugin('vendors', 'common.js'),
+		// new webpack.optimize.UglifyJsPlugin({
+		// 	compress: {
+		// 		warnings: false
+		// 	}
+		// }),
+		new webpack.optimize.OccurenceOrderPlugin(),
+		new webpack.HotModuleReplacementPlugin(),
 		new webpack.NoErrorsPlugin(),
 	]
 };

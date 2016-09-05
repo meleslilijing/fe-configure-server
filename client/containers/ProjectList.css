@@ -1,0 +1,12 @@
+#project-list {
+    padding: 30px;
+}
+
+#project-list .project {
+    margin-bottom: 30px;
+}
+
+.Select {
+    width: 120px;
+    margin-right: .5em;
+}

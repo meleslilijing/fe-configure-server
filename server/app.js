@@ -1,45 +1,44 @@
 'use strict';
-const messages = require('./controllers/messages');
+const http = require('http');
 const path = require('path');
+const messages = require('./controllers/messages');
 const compress = require('koa-compress');
+const parser = require('koa-bodyparser');
 const logger = require('koa-logger');
-// const bunyan = require('bunyan');
-// const log = bunyan.createLogger({
-//     name: 'myapp',
-//     streams: [
-//         {
-//             level: 'info',
-//             stream: path.join(__dirname, './log/info.log')
-//         }
-//     ]
-// });
 
-const serve = require('koa-static');
+const staticServer = require('koa-static');
 const koa = require('koa');
-const router = require('koa-router');
+const pagesRouter = require('./routes/pages.js');
 const rootRouter = require('./routes/routes.js');
 const app = koa();
 
-// Logger
 app.use(logger());
 
-// app.use(function *(next) {
-// 	log.info()
-// 	yield next;
-// })
+// body parse
+app.use(parser());
+app.use(function *(next) {
+	this.body = this.request.body;
+	yield next;
+});
 
+app.use(pagesRouter.routes());
 app.use(rootRouter.routes());
 
 // Serve static files
-// app.use(serve(path.join(__dirname, '/public')));
-app.use(serve(path.join(__dirname, '/../client/dist/')));
+app.use(staticServer(path.join(__dirname, '/public')));
 
 // Compress
 app.use(compress());
 
-if (!module.parent) {
-  app.listen(3000);
-  console.log('listening on port 3000');
-}
+// catch 404
+app.use(function *(next) {
+	this.throw(404, '404 Not Found');
+	yield next;
+});
+
+// error Handler
+app.on('error', function *(err, ctx) {
+	ctx.body = yield err.message;
+})
 
 module.exports = app;

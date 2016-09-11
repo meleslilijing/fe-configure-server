@@ -21,7 +21,8 @@ function NavItemFactory(text='', href='#', iconType='') {
 const NavList = [
     NavItemFactory('首页', '/index', 'home'),
     NavItemFactory('项目列表', '/project_list', 'setting'),
-    NavItemFactory('日志', '/log', 'book')
+    NavItemFactory('部署日志', '/log', 'book'),
+    NavItemFactory('项目版本测试', '/project_test')
 ];
 
 class Nav extends Component {
@@ -30,8 +31,13 @@ class Nav extends Component {
     }
 
     render() {
-
-        const selectedKeys = window.location.pathname;
+        const selectedKeys = (function() {
+            var selected =  window.location.pathname;
+            if(selected = '/') {
+                selected = '/index'
+            }
+            return selected;
+        }())
 
         return (
             <Menu
@@ -46,7 +52,11 @@ class Nav extends Component {
                         return (
                             <Menu.Item key={ href }>
                                 <a href={ href }>
-                                    <Icon type={ iconType }></Icon>
+                                    {
+                                        iconType ?
+                                        <Icon type={ iconType }></Icon> :
+                                        ''
+                                    }
                                     { text }
                                 </a>
                             </Menu.Item>

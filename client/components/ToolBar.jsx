@@ -1,18 +1,32 @@
+// TODO
+// 未使用
+
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
-import { Button } from 'antd';
+import { Collapse } from 'antd';
+const Panel = Collapse.Panel;
 
 class ToolBar extends Component {
     constructor(props) {
         super(props);
+
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange() {
+        console.log('handleChange')
     }
 
     render() {
         return (
-            <div id="toolbar">
-                <Button>添加项目</Button>
-            </div>
+            <Collapse
+                onChange={this.handleChange}
+            >
+                <Panel header="添加项目" key="1">
+                    TODO
+                </Panel>
+            </Collapse>
         )
     }
 }

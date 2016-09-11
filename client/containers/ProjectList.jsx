@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import Api from '../utils/Api.js';
 
-import { Button, Select, Modal, Alert } from 'antd';
+import { Button, Select, Modal, Alert, Input } from 'antd';
 
 import './ProjectList.css';
 
@@ -24,7 +24,7 @@ class Project extends Component {
 
         const { showModal } = this.props;
 
-        return function(event) {
+        return function (event) {
             const version = self.state.value;
 
             showModal(name, version);
@@ -52,10 +52,9 @@ class Project extends Component {
                 <p>当前项目版本：{ currentVersion }</p>
                 <Select
                     className="Select"
-                    ref="Select"
                     defaultValue={ currentVersion }
                     onChange={ this.handleChange }
-                >
+                    >
                     { options }
                 </Select>
                 <Button type="primary" onClick={ this.applyNewVersion(name) }>应用</Button>
@@ -87,7 +86,7 @@ class ProjectList extends Component {
     }
 
     showModal(name, version) {
-        const modalText = `将项目 ${ name } 的当前版本变更为 ${ version }`
+        const modalText = `将项目 ${name} 的当前版本变更为 ${version}`
 
         this.setState({
             ModalVisible: true,
@@ -121,7 +120,7 @@ class ProjectList extends Component {
         Api.setProjectVersion(projectName, version)
             .end((error, response) => {
 
-                if(error) {
+                if (error) {
                     showAlert('error', error.toString())
                 }
 
@@ -129,7 +128,7 @@ class ProjectList extends Component {
 
                 const { rtnCode, rtnMsg } = response;
 
-                if(rtnCode == 0) {
+                if (rtnCode == 0) {
                     showAlert('success', response.rtnMsg)
                 }
                 else {
@@ -140,7 +139,7 @@ class ProjectList extends Component {
     }
 
     showAlert(type, message) {
-        if(
+        if (
             type !== 'success' &&
             type !== 'info' &&
             type !== 'warning' &&
@@ -164,7 +163,7 @@ class ProjectList extends Component {
     }
 
     createAlertDOM() {
-        if(!this.state.hasAlert) {
+        if (!this.state.hasAlert) {
             return '';
         }
 
@@ -179,38 +178,57 @@ class ProjectList extends Component {
         )
     }
 
-    render() {
+    createProjectListDOM() {
         const self = this;
+        
         const { list } = this.props;
-
         const projectList = [];
 
-        for(var key in list) {
-            var versions = list[key]['versions'];
-            var currentVersion = list[key]['currentVersion'];
+        // for (var key in list) {
+        //     var versions = list[key]['versions'];
+        //     var currentVersion = list[key]['currentVersion'];
 
-            projectList.push(
+        //     projectList.push(
+        //         <Project
+        //             className="project"
+        //             name={ key }
+        //             versions={ versions }
+        //             currentVersion={ currentVersion }
+        //             showModal={ self.showModal }
+        //         />
+        //     );
+        // }
+
+        console.log('list: ', list)
+
+        return list.map(function(project) {
+            const { currentVersion, project_name, branch } = project;
+
+            return (
                 <Project
                     className="project"
-                    name={ key }
-                    versions={ versions }
-                    currentVersion={ currentVersion }
+                    name={ project_name+'_'+branch }
+                    versions={[]}
+                    currentVersion={currentVersion}
                     showModal={ self.showModal }
                 />
-            );
-        }
+            )
+        })
+    }
 
+    render() {
         return (
             <div id="project-list">
+                <h2>项目列表</h2>
                 { this.createAlertDOM() }
-                { projectList }
+                { this.createProjectListDOM() }
                 <Modal title="对话框标题"
-                  visible={ this.state.ModalVisible }
-                  onOk={this.handleModalOk}
-                  confirmLoading={this.state.confirmLoading}
-                  onCancel={this.handleModalCancel}
-                >
-                   <p>{ this.state.ModalText }</p>
+                    visible={ this.state.ModalVisible }
+                    onOk={this.handleModalOk}
+                    confirmLoading={this.state.confirmLoading}
+                    onCancel={this.handleModalCancel}
+                    >
+                    <p>{ this.state.ModalText }</p>
                 </Modal>
             </div>
         )

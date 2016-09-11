@@ -43,7 +43,7 @@ function getEntrys(pages) {
 		 if(!(page instanceof Array)) {
 			 entrys[key] = [page];
 		 }
-		 entrys[key].push("webpack-hot-middleware/client?reload=true&timeout=20000&quiet=true")
+		//  entrys[key].push("webpack-hot-middleware/client?reload=true&timeout=20000&quiet=true")
 	}
 	return entrys;
 }
@@ -56,6 +56,9 @@ var pages = getFilesList(pagesDir, ['js', 'jsx']);
 // 		vendors: [ 'react', 'react-dom' ]
 // }
 var entrys = getEntrys(pages);
+
+console.log('pages: ', pages);
+console.log('entrys: ', entrys);
 
 module.exports = {
 	entry: entrys,

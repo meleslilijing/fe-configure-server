@@ -6,12 +6,25 @@ var HtmlwebpackPlugin = require('html-webpack-plugin');
 
 var pagesDir = path.join(__dirname, 'client/pages');
 
-function getFilesList(dir) {
-	var files = fs.readdirSync(dir);
+function getFilesList(dir, resolve) {
+	var files = fs.readdirSync(dir)
 
 	var result = {};
 
-	files.forEach(function(file) {
+	files
+	.filter(function(file) {
+		// 过滤入口文件的数据类型
+		var ext = path.extname(file);
+
+		for(var type = 0; type < resolve.length; type++) {
+			if('.'+resolve[type] === ext) {
+				return true;
+			}
+		}
+
+		return false;
+	})
+	.forEach(function(file) {
 		var ext = path.extname(file);
 		var name = path.basename(file, ext);
 		result[name] = path.join(pagesDir, file)
@@ -20,20 +33,32 @@ function getFilesList(dir) {
 	return result;
 }
 
-function getEntrys(pages) {
-	var entrys = pages;
-
-	return Object.assign({vendors: ['react', 'react-dom']}, entrys);
-}
+// function getEntrys(pages) {
+// 	// var pages = Object.assign({}, pages);
+//
+// 	// var entrys = {};
+// 	//
+// 	// for(var key in pages) {
+// 	// 	 var page = pages[key];
+// 	// 	 if(!(page instanceof Array)) {
+// 	// 		 entrys[key] = [page];
+// 	// 	 }
+// 	// 	 entrys[key].push("webpack-hot-middleware/client?reload=true&timeout=20000&quiet=true")
+// 	// }
+// 	return pages;
+// }
 
 // return example.jsx
-var pages = getFilesList(pagesDir);
+var pages = getFilesList(pagesDir, ['js', 'jsx']);
 
 // return {
 // 		example: { "xxx/xx/example.js" },
 // 		vendors: [ 'react', 'react-dom' ]
 // }
-var entrys = getEntrys(Object.assign({}, pages));
+var entrys = pages;
+
+console.log('pages: ', pages);
+console.log('entrys: ', entrys);
 
 module.exports = {
 	entry: entrys,

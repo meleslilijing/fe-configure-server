@@ -1,201 +1,101 @@
-var options = {
-    host: 'localhost',
-    port: '3306',
-    database: 'fe_config',
-    user: 'root',
-    password: '123456',
-    connectionLimit: 5,
-    supportBigNumbers: true,
-    bigNumberStrings: true
+/*
+Model必须遵守一套规范：
+
+统一主键，名称必须是id，类型必须是STRING(50)；
+主键可以自己指定，也可以由框架自动生成（如果为null或undefined）；
+所有字段默认为NOT NULL，除非显式指定；
+统一timestamp机制，每个Model必须有createdAt、updatedAt，分别记录创建时间、修改时间。
+其中，createdAt和updatedAt以BIGINT存储时间戳，最大的好处是无需处理时区，排序方便。
+*/
+var Sequelize = require('sequelize');
+var config = require('./config.js');    // 开发环境数据库配置文件
+
+// var uuid = require('node-uuid');
+
+// function generateId() {
+//     return uuid.v4();
+// }
+
+var sequelize = new Sequelize(config.dbname, config.user, config.password, {
+    host: config.host,
+    dialect: 'mysql',
+    pool: {
+        max: 5,
+        min: 1,
+        idle: 10000
+    }
+})
+
+var ID_TYPE = Sequelize.INTEGER;
+
+// defineModel 用于强制实现Model规则
+function defineModel (name, attributes) {
+    var attrs = {}
+
+    for(var key in attributes) {
+        var value = attributes[key];
+        if(typeof value === 'object' && value['type']) {
+            value.allowNull = value.allowNull || false;
+            attrs[key] = value;
+        } else {
+            attrs[key] = {
+                type: value,
+                allowNull: false 
+            }
+        }
+
+        attrs.id = {
+            type: ID_TYPE,
+            primaryKey: true,
+            autoIncrement: true
+        }
+
+        attrs.createdAt = {
+            type: Sequelize.BIGINT,
+            allowNull: false
+        }
+
+        attrs.updatedAt = {
+            type: Sequelize.BIGINT,
+            allowNull: false
+        }
+    }
+
+    return sequelize.define(name, attrs, {
+        tableName: name, 
+        timestamp: false,
+        hooks: {
+            beforeValidate: function(obj) {
+                var now = +new Date;
+                if(obj.isNewRecord) {
+                    obj.createdAt = now;
+                    obj.updatedAt = now;
+                } else {
+                    obj.updatedAt = now;
+                }
+            }   
+        } // end of hooks
+    })  
+}
+
+var TYPES = ['STRING', 'INTEGER', 'BIGINT', 'TEXT', 'DOUBLE', 'DATEONLY', 'BOOLEAN'];
+var exp = {
+    defineModel: defineModel,
+    sync: function(obj) {
+        sequelize.sync(obj)
+        // only allow create ddl in non-production environment:
+        // if (process.env.NODE_ENV !== 'production') {
+        //     sequelize.sync({ force: true });
+        // } else {
+        //     throw new Error('Cannot sync() when NODE_ENV is set to \'production\'.');
+        // }
+    }
 };
 
-var mysql = require('mysql2');
-var pool = mysql.createPool(options);
+TYPES.forEach(function(type) {
+    exp[type] = Sequelize[type];
+})
 
-function execQuery(sql, values, callback) {
-    pool.getConnection(function(err, connection) {
-        if (err) {
-            console.log('db error: ');
-            console.log(err);
-            callback(new Error('DB: 获取数据库链接异常'));
-        } else {
-            // rows为查询结果
-            var querys = connection.query(sql, values, function(err, rows) {
-                // release
-                try {
-                    connection.release(function(error) {
-                        if (error) {
-                            callback(new Error('DB: 关闭数据库连接异常！'));
-                        }
-                    });
+exp.ID = ID_TYPE;
 
-                } catch (error) {
-                    callback(error);
-                }
-
-                // selector
-                if (err) {
-                    callback(new Error('DB: SQL语句执行错误-' + err))
-                } else {
-                    callback(null, rows)
-                }
-            }); // endof connection.query
-        } // endof if
-    });
-}
-
-// 返回projects表
-module.exports.projectsTable = function() {
-    var sql = 'SELECT * FROM projects';
-    return new Promise((resolve, reject) => {
-        execQuery(sql, function(error, rows) {
-            if(error) reject(error);
-            resolve(rows);
-        })
-    })
-}
-
-// 查询项目
-module.exports.queryProjectName = function(name) {
-    var sql = 'SELECT name FROM projects WHERE name=?;';
-    var values = [name];
-
-    return new Promise((resolve, reject) => {
-        execQuery(sql, values, function(error, rows) {
-            if(error) reject(error);
-            resolve(rows);
-        })
-    })
-
-}
-
-// 添加项目
-module.exports.addProject = function(name, defaultVersion) {
-    var defaultVersion = defaultVersion || null;
-
-    var sql = 'INSERT INTO projects (name, currentVersion) VALUES (?, ?);';
-    var values = [name, defaultVersion];
-
-    return new Promise(function(resolve, reject) {
-        execQuery(sql, values, function(error, rows) {
-            if(error) {
-                reject(error);
-            }
-            else {
-                resolve(rows);
-            }
-        })
-    })
-}
-
-// 添加某项目的版本
-module.exports.addVersion = function(name, version, timestamp) {
-    var timestamp = +new Date;
-
-    var sqls = [
-        'INSERT INTO versions (name, version, timestamp) VALUES (?, ?, ?);',
-        'UPDATE projects SET currentVersion=?, timestamp=? WHERE name=?;'
-    ];
-
-    var values = [
-        [name, version, timestamp],
-        [version, timestamp, name]
-    ]
-
-    return new Promise(function(resolve, reject) {
-        execQuery(sqls[0], values[0], function(error1, rows1) {
-            execQuery(sqls[1], values[1], function(error2, rows2) {
-                var error = error2 || error1;
-                if(error) {
-                    reject(error)
-                }
-                else {
-                    var rows = rows2 || rows1;
-                    resolve(rows)
-                }
-            })
-        })
-    }); // endof promise
-
-}
-
-// 查询所有项目版本列表
-module.exports.queryProjectVersions = function() {
-    var sql = 'SELECT name, version FROM versions'
-
-    return new Promise(function(resolve, reject) {
-        execQuery(sql, function(error, rows) {
-            if(error) {
-                reject(error);
-            }
-            else {
-                resolve(rows);
-            }
-        })
-    });
-}
-
-// TODO POST-man测试后不生效
-// 设置某项目的版本
-module.exports.setVersion = function(name, version) {
-    var timestamp = +new Date;
-    var sql = 'UPDATE projects SET currentVersion=?, timestamp=? WHERE name=?;';
-    var values = [version, timestamp, name];
-
-    return new Promise(function(resolve, reject) {
-        execQuery(sql, values, function(error, rows) {
-            if(error) {
-                reject(error);
-            }
-            else {
-                resolve(rows);
-            }
-        })
-    });
-}
-
-// 获取项目当前版本
-module.exports.getProjectVersion = function(name) {
-    var sql = 'SELECT currentVersion FROM projects WHERE name=?;';
-    var values = [name];
-
-    return new Promise(function(resolve, reject) {
-        execQuery(sql, values, function(error, rows) {
-            if(error) {
-                reject(error);
-            }
-            else {
-                resolve(rows);
-            }
-        })
-    })
-}
-
-// module.exports.createRandomVersion = function() {
-//    var random = function() {
-//         var result = parseInt(Math.random()*1000);
-//         (result < 1000) && (result = '0' + result);
-//         return result;
-//     };
-
-//     var testVersion = 'testVersion' + random();
-//     var timestamp = +new Date;
-//     var sqls = [
-//         `INSERT INTO versions (name, version) VALUES (testProject, ${testVersion});`,
-//         `UPDATE projectList set vurrentVersion=${testVersion}, timestamp=${timestamp} where name=testProject`
-//     ];
-
-//     return new Promise(function(resolve, reject) {
-//         execQuery(sqls[0], function(error, rows) {
-//             execQuery(sqls[1], function(error2, rows2) {
-//                 var err = error2 || error;
-//                 if(err) {
-//                     reject(err);
-//                 }
-//                 else {
-//                     resolve(rows2 || rows);
-//                 }
-//             })
-//         });
-//     })
-// }
+module.exports = exp;

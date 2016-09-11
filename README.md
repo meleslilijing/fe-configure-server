@@ -1,3 +1,7 @@
+TODO
+重构db。改用ORM, 同时有细分的controller
+
+
 # koa-app 的generator项目
 
 ## START
@@ -12,6 +16,8 @@ client:
 - build:  mock server的build模式
 
 ## DB desine
+
+｀表结构需要修改｀
 
 ### Table: projectList
 | Column | Type     | describe |

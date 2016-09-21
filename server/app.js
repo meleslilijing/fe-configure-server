@@ -21,7 +21,7 @@ const app = require('koa')();
 app.use(logger());
 
 // 初始化数据库
-model.sync();
+// model.sync();
 
 // body parse
 app.use(parser());

@@ -19,7 +19,7 @@ class Project extends Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
-    applyNewVersion(name) {
+    applyNewVersion(name, branch) {
         var self = this;
 
         const { showModal } = this.props;
@@ -27,9 +27,8 @@ class Project extends Component {
         return function (event) {
             const version = self.state.value;
 
-            showModal(name, version);
+            showModal(name, branch, version);
         }
-
     }
 
     handleChange(value) {
@@ -39,8 +38,8 @@ class Project extends Component {
     }
 
     render() {
-        const { name, versions, currentVersion } = this.props;
-        const versionsStr = versions.join(', ');
+        const { name, branch, versions, currentVersion } = this.props;
+        // const versionsStr = versions.join(', ');
 
         const options = versions.map((version) => {
             return <Option value={version}>{version}</Option>;
@@ -49,6 +48,7 @@ class Project extends Component {
         return (
             <div className={this.props.className}>
                 <h3>项目名称：{ name }</h3>
+                <p>分支: { branch }</p>
                 <p>当前项目版本：{ currentVersion }</p>
                 <Select
                     className="Select"
@@ -57,7 +57,7 @@ class Project extends Component {
                     >
                     { options }
                 </Select>
-                <Button type="primary" onClick={ this.applyNewVersion(name) }>应用</Button>
+                <Button type="primary" onClick={ this.applyNewVersion(name, branch) }>应用</Button>
             </div>
         );
     }
@@ -71,6 +71,7 @@ class ProjectList extends Component {
             ModalVisible: false,
             ModalText: '',
             bufferName: '',
+            bufferBranch: '',
             bufferVersion: '',
             hasAlert: false,
             AlertMessage: '',
@@ -85,13 +86,18 @@ class ProjectList extends Component {
         this.handleAlertClosed = this.handleAlertClosed.bind(this);
     }
 
-    showModal(name, version) {
+    showModal(name, branch, version) {
         const modalText = `将项目 ${name} 的当前版本变更为 ${version}`
+
+        console.log('show Modal name: ', name);
+        console.log('show Modal branch: ', branch);
+        console.log('show Modal version: ', version);
 
         this.setState({
             ModalVisible: true,
             ModalText: modalText,
             bufferName: name,
+            bufferBranch: branch,
             bufferVersion: version
         })
     }
@@ -112,12 +118,17 @@ class ProjectList extends Component {
 
         const showAlert = this.showAlert;
 
-        const projectName = this.state.bufferName,
+        const name = this.state.bufferName,
+            branch = this.state.bufferBranch,
             version = this.state.bufferVersion;
+            
+        console.log('handle Ok name: ', name);
+        console.log('handle Ok branch: ', branch);
+        console.log('handle Ok version: ', version);
 
         this.hideModal();
 
-        Api.setProjectVersion(projectName, version)
+        Api.setProjectVersion(name, branch, version)
             .end((error, response) => {
 
                 if (error) {
@@ -146,7 +157,6 @@ class ProjectList extends Component {
             type !== 'error'
         ) {
             throw new TypeError('Ant Desing Alert type was wrong!');
-            return;
         }
 
         this.setState({
@@ -184,32 +194,16 @@ class ProjectList extends Component {
         const { list } = this.props;
         const projectList = [];
 
-        // for (var key in list) {
-        //     var versions = list[key]['versions'];
-        //     var currentVersion = list[key]['currentVersion'];
-
-        //     projectList.push(
-        //         <Project
-        //             className="project"
-        //             name={ key }
-        //             versions={ versions }
-        //             currentVersion={ currentVersion }
-        //             showModal={ self.showModal }
-        //         />
-        //     );
-        // }
-
-        console.log('list: ', list)
-
         return list.map(function(project) {
-            const { currentVersion, project_name, branch } = project;
+            const { current_version, project_name, branch, versions } = project;
 
             return (
                 <Project
                     className="project"
-                    name={ project_name+'_'+branch }
-                    versions={[]}
-                    currentVersion={currentVersion}
+                    name={ project_name }
+                    branch={ branch }
+                    versions={ versions }
+                    currentVersion={ current_version }
                     showModal={ self.showModal }
                 />
             )

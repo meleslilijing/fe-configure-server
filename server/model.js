@@ -3,7 +3,7 @@ var db = require('./db/db.js');
 
 var files = fs.readdirSync(__dirname + '/models');
 
-var js_files = files.filter((f)=>{
+var js_files = files.filter((f) => {
     return f.endsWith('.js');
 }, files);
 

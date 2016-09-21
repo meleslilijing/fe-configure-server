@@ -33,7 +33,7 @@ class Nav extends Component {
     render() {
         const selectedKeys = (function() {
             var selected =  window.location.pathname;
-            if(selected = '/') {
+            if(selected === '/') {
                 selected = '/index'
             }
             return selected;

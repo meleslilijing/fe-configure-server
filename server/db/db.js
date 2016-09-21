@@ -44,18 +44,18 @@ function defineModel (name, attributes) {
             }
         }
 
-        attrs.id = {
+        attrs['id'] = {
             type: ID_TYPE,
             primaryKey: true,
             autoIncrement: true
         }
 
-        attrs.createdAt = {
+        attrs['created'] = {
             type: Sequelize.BIGINT,
             allowNull: false
         }
 
-        attrs.updatedAt = {
+        attrs['updated'] = {
             type: Sequelize.BIGINT,
             allowNull: false
         }
@@ -68,10 +68,10 @@ function defineModel (name, attributes) {
             beforeValidate: function(obj) {
                 var now = +new Date;
                 if(obj.isNewRecord) {
-                    obj.createdAt = now;
-                    obj.updatedAt = now;
+                    obj['created'] = now;
+                    obj['updated'] = now;
                 } else {
-                    obj.updatedAt = now;
+                    obj['updated'] = now;
                 }
             }   
         } // end of hooks

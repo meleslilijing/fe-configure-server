@@ -1,6 +1,18 @@
 TODO
-重构db。改用ORM, 同时有细分的controller
+数据库操作引入事务
+api需要以restfull的方式重新组织
 
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------
 
 # koa-app 的generator项目
 
@@ -14,6 +26,9 @@ server:
 client:
 - dev:    mock server的develop模式
 - build:  mock server的build模式
+
+
+
 
 ## DB desine
 

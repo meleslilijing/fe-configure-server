@@ -1,7 +1,7 @@
-var db = require('../db/db.js')
+var Db = require('../db/db.js')
 
-module.exports = db.defineModel('Projects', {
-    project_name: db.STRING(50),
-    branch: db.STRING(50),
-    current_version: db.STRING(50)
+module.exports = Db.defineModel('project', {
+    project_name: Db.STRING(50),
+    branch: Db.STRING(50),
+    current_version: Db.STRING(50)
 })

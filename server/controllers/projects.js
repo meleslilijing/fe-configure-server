@@ -99,8 +99,11 @@
 
 // // 设置项目当前版本
 // // @params name
-// // @params version
-// rootRouter.post('/project_list/set_version', function *() {
+// //
+// 设置项目当前版本 @params version
+// rootRouter.post('/project_list/set_version': function() {
+
+// }, f,unction *() {
 
 //     var name = this.body['name'];
 //     var version = this.body['version'];
@@ -224,13 +227,9 @@ function modelToObject(model, keys) {
     return obj
 }
 
-
 module.exports = {
     // 查询所有项目的版本列表
     'GET /project_list/list': function *() {
-        /**
-         * 全表查询，和查询多次表
-         */
         var projects = yield Projects.findAll();
 
         var data = projects.map(function(version) {
@@ -251,14 +250,10 @@ module.exports = {
                 }
             })
 
-            console.log('versions: ', versions)
-
             versions.forEach(function(version) {
                 item['versions'].push( version['version'] );
             })
         }
-
-        // console.log("/project_list/list data: ", data);
 
         this.body = {
             rtnCode: 0,
@@ -287,8 +282,6 @@ module.exports = {
 
             var data = modelToObject(version, ['current_version']);
 
-            // console.log('version: ', version[0]);
-
             const versionUrl = path.join('http://localhost:3000', name, branch, data['current_version'])+'.js';
 
             this.body = {
@@ -302,8 +295,42 @@ module.exports = {
             console.log(e)
             this.throw(e)
         }
+    },
+    // 设置项目当前版本
+    // @params branch
+    // @params name 
+    // @params version 
+    'POST /project_list/set_version': function *() {
+        var self = this;
 
-        
+        var name = this.body.name;
+        var branch =  this.body.branch;
+        var version =  this.body.version;
+
+        if(!name || !branch || !version) {
+            this.throw(400, '项目名称，项目分支, 版本号不能为空');
+        }
+
+        try {
+                var task = yield Projects.update({
+                    current_version: version
+                }, 
+                {
+                    where: {
+                        project_name: name,
+                        branch: branch
+                    }
+                })
+                .then(function() {
+                    self.body = {
+                        rtnCode: 0,
+                        rtnMsg: 'ok'
+                    }
+                })
+        } catch(error) {
+            console.log(e);
+            this.throw(e);
+        }
     },
     // 添加项目
     'POST /project_list/insert_project': function*() {
@@ -326,7 +353,7 @@ module.exports = {
 
             this.body = {
                 rtnCode: 0,
-                rtnMsg: '添加项目' + name + ', branch: ' + branch + ', current_version: NULL'
+                rtnMsg: 'ok'
             }
         } catch(e) {
             console.log(e);
@@ -335,6 +362,9 @@ module.exports = {
     },
     // 为某项目添加一个版本
     // 发布新fe项目时调用
+    // @params branch
+    // @params name 
+    // @params version 
     'POST /project_list/insert_version': function *() {
         /**
          * curl -X POST --data "name=main_home&branch=release&version=test_1" localhost:3000/project_list/insert_version
@@ -362,7 +392,6 @@ module.exports = {
                 }
             })
 
-            console.log('oldVersion: ', oldVersion)
             // 分支已存在
             if(oldVersion) {
                 var msg = [name, branch, newVersion, 'exist already.'].join(' ');
@@ -399,15 +428,16 @@ module.exports = {
                 project.current_version = newVersion;
                 project.save();
             }
-
-            
         } catch (e) {
             console.log(e);
             this.throw(e.toString());
             return;
         }
 
-        this.body = 'ok'
+        this.body = {
+            rtnCode: 0,
+            rtnMsg: 'ok'
+        }
      
     }
 }

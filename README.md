@@ -1,13 +1,9 @@
 TODO
+
+修改version表的冗余
+引入第三张表
 数据库操作引入事务
-api需要以restfull的方式重新组织
-
-
-
-
-
-
-
+api需要以restfull的方式重新组织, restfull仅仅是一个接口和子域名的设计规范
 
 
 

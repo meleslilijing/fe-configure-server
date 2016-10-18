@@ -15,13 +15,11 @@ const Router = require('koa-router');
 const router = new Router();
 
 const app = require('koa')();
-// const Pages = require('./controllers/Pages.js');
-// const Project = require('./controllers/Project.js');
 
 app.use(logger());
 
 // 初始化数据库
-// model.sync();
+model.sync();
 
 // body parse
 app.use(parser());

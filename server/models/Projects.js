@@ -1,4 +1,4 @@
-var Db = require('../db/db.js')
+var Db = require('../db/db.js');
 
 module.exports = Db.defineModel('project', {
     project_name: Db.STRING(50),

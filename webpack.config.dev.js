@@ -57,9 +57,6 @@ var pages = getFilesList(pagesDir, ['js', 'jsx']);
 // }
 var entrys = getEntrys(pages);
 
-console.log('pages: ', pages);
-console.log('entrys: ', entrys);
-
 module.exports = {
 	entry: entrys,
 	output: {
